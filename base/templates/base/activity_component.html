@@ -2,7 +2,7 @@
 <hr>
 {% for massage in room_massages %}
 <div>
-    <small>@{{massage.user}} {{massage.created|timesince}}</small>
+    <small><a href="{% url 'user-profile' massage.user.id %}">@{{massage.user}}</a> {{massage.created|timesince}}</small>
     <small>replied to "{{massage.room}}"</small>
     <p>{{massage}}</p>
     {% if request.user == massage.user %}
