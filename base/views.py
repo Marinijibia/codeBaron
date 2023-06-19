@@ -63,13 +63,14 @@ def home(request):
 
     topics = Topic.objects.all()
     room_count = rooms.count()
+    room_massages = Massage.objects.filter(Q(room__topic__name__icontains=q))
 
-    context = {'rooms' : rooms, 'topics': topics, 'room_count' : room_count  }
+    context = {'rooms' : rooms, 'topics': topics, 'room_count' : room_count, 'room_massages' : room_massages }
     return render(request, 'base/home.html', context)
 
 def room(request, pk):
     room = Room.objects.get(id=pk)
-    room_massages = room.massage_set.all().order_by('-created')
+    room_massages = room.massage_set.all()
     participants = room.participants.all()
     if request.method == 'POST':
         massage = Massage.objects.create(
