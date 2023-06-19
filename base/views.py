@@ -128,3 +128,18 @@ def deleteRoom(request, pk):
 
     context = { 'obj' : room }
     return render(request, 'base/delete.html', context)
+
+
+@login_required(login_url='login')
+def deleteMassage(request, pk):
+    massage= Massage.objects.get(id=pk)
+
+    if request.user != massage.user :
+        return HttpResponse("Your are not allowed")
+
+    if request.method == 'POST':
+        massage.delete()
+        return redirect('home')
+
+    context = { 'obj' : massage }
+    return render(request, 'base/delete.html', context)
