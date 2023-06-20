@@ -34,9 +34,11 @@ def loginPage(request):
     context = {'page': page}
     return render(request, 'base/login_register.html', context)
 
+
 def logoutuser(request):
     logout(request)
     return redirect('home')
+
 
 def registerPage(request):
     form = UserCreationForm()
@@ -50,8 +52,10 @@ def registerPage(request):
             login(request, user)
             return redirect('home')
         else:
-            messages.error(request, 'something whent wrong cheak and try again')
-    return render(request, 'base/login_register.html', { 'form': form })
+            messages.error(
+                request, 'something whent wrong cheak and try again')
+    return render(request, 'base/login_register.html', {'form': form})
+
 
 def home(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
@@ -59,14 +63,16 @@ def home(request):
         Q(topic__name__icontains=q) |
         Q(name__icontains=q) |
         Q(description__icontains=q)
-        )
+    )
 
     topics = Topic.objects.all()[0:5]
     room_count = rooms.count()
     room_massages = Massage.objects.filter(Q(room__topic__name__icontains=q))
 
-    context = {'rooms' : rooms, 'topics': topics, 'room_count' : room_count, 'room_massages' : room_massages }
+    context = {'rooms': rooms, 'topics': topics,
+               'room_count': room_count, 'room_massages': room_massages}
     return render(request, 'base/home.html', context)
+
 
 def room(request, pk):
     room = Room.objects.get(id=pk)
@@ -74,22 +80,25 @@ def room(request, pk):
     participants = room.participants.all()
     if request.method == 'POST':
         massage = Massage.objects.create(
-            user = request.user,
-            room = room,
-            body = request.POST.get('body')
+            user=request.user,
+            room=room,
+            body=request.POST.get('body')
         )
         room.participants.add(request.user)
         return redirect('room', pk=room.id)
 
-    context = { 'room' : room, 'room_massages' : room_massages, 'participants' : participants }
-    return render(request, 'base/room.html', context) 
+    context = {'room': room, 'room_massages': room_massages,
+               'participants': participants}
+    return render(request, 'base/room.html', context)
+
 
 def userProfile(request, pk):
     user = User.objects.get(id=pk)
     rooms = user.room_set.all()
     room_massages = user.massage_set.all()
     topics = Topic.objects.all()
-    context = {'user' : user, 'rooms' : rooms, 'room_massages' : room_massages, 'topics' : topics}
+    context = {'user': user, 'rooms': rooms,
+               'room_massages': room_massages, 'topics': topics}
     return render(request, 'base/profile.html', context)
 
 
@@ -97,10 +106,10 @@ def userProfile(request, pk):
 def createRoom(request):
     form = RoomForm()
     topics = Topic.objects.all()
-    if request.method == 'POST': 
+    if request.method == 'POST':
         topic_name = request.POST.get('topic')
         topic, created = Topic.objects.get_or_create(name=topic_name)
-        
+
         Room.objects.create(
             host=request.user,
             topic=topic,
@@ -108,8 +117,8 @@ def createRoom(request):
             description=request.POST.get('description'),
         )
         return redirect("home")
-        
-    context = { 'form' : form, 'topics' : topics}
+
+    context = {'form': form, 'topics': topics}
     return render(request, 'base/room_form.html', context)
 
 
@@ -118,7 +127,7 @@ def updateRoom(request, pk):
     room = Room.objects.get(id=pk)
     form = RoomForm(instance=room)
     topics = Topic.objects.all()
-    if request.user != room.host :
+    if request.user != room.host:
         return HttpResponse("Your are not allowed")
 
     if request.method == 'POST':
@@ -130,37 +139,37 @@ def updateRoom(request, pk):
         room.save()
         return redirect('home')
 
-    context = {'form' : form, 'topics' : topics, 'room' : room}
-    return render(request, 'base/room_form.html', context )
+    context = {'form': form, 'topics': topics, 'room': room}
+    return render(request, 'base/room_form.html', context)
 
 
 @login_required(login_url='login')
 def deleteRoom(request, pk):
     room = Room.objects.get(id=pk)
 
-    if request.user != room.host :
+    if request.user != room.host:
         return HttpResponse("Your are not allowed")
 
     if request.method == 'POST':
         room.delete()
         return redirect('home')
 
-    context = { 'obj' : room }
+    context = {'obj': room}
     return render(request, 'base/delete.html', context)
 
 
 @login_required(login_url='login')
 def deleteMassage(request, pk):
-    massage= Massage.objects.get(id=pk)
+    massage = Massage.objects.get(id=pk)
 
-    if request.user != massage.user :
+    if request.user != massage.user:
         return HttpResponse("Your are not allowed")
 
     if request.method == 'POST':
         massage.delete()
         return redirect('home')
 
-    context = { 'obj' : massage }
+    context = {'obj': massage}
     return render(request, 'base/delete.html', context)
 
 
@@ -175,17 +184,15 @@ def updateUser(request):
             form.save()
             return redirect('user-profile', pk=user.id)
 
-
-    return render(request, 'base/update-user.html', {'form' : form})
+    return render(request, 'base/update-user.html', {'form': form})
 
 
 def topicsPage(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
     topics = Topic.objects.filter(name__icontains=q)
-    return render(request, 'base/topics.html',  {'topics' : topics} )
+    return render(request, 'base/topics.html',  {'topics': topics})
 
 
 def activitiesPage(request):
     room_massages = Massage.objects.all()
-    return render(request, 'base/activity.html', { 'room_massages' : room_massages } )
- 
+    return render(request, 'base/activity.html', {'room_massages': room_massages})
